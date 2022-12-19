@@ -27,7 +27,27 @@
 #include "ffmpeg/libswscale/swscale.h"
 
 int main(int argc, charg *argv[]){
-    av_register_all();
+
+    // Initializing these to NULL prevents segfaults!
+    AVFormatContext* pFormatCtx = NULL;
+    int               i, videoStream;
+    AVCodecContext* pCodecCtxOrig = NULL;
+    AVCodecContext* pCodecCtx = NULL;
+    AVCodec* pCodec = NULL;
+    AVFrame* pFrame = NULL;
+    AVFrame* pFrameRGB = NULL;
+    AVPacket          packet;
+    int               frameFinished;
+    int               numBytes;
+    uint8_t* buffer = NULL;
+    struct SwsContext* sws_ctx = NULL;
+
+    if (argc < 2) {
+        printf("Please provide a moive file\n");
+        return -1;
+    }
+    // Register all formats and codecs
+    // av_register_all(); // av_register_ll()has been deprecated in ffmpeg 4 
     AVFormatContext *pFormatCtx = NULL;
     if(avformat_open_input(&pFormatCtx,argv[1],NULL,0,NULL) != 0)
         return -1; // Couldn't open file
@@ -41,12 +61,16 @@ int main(int argc, charg *argv[]){
     // Find the first video stream
     VideoStream = -1;
     for(i=0; i<pFormatCtx->nb_streams;i++){
-        if (pFormatCtx->Stream[i]->codec->codec_type==AVMEDIA_TYPE)
-        {
-            /* code */
+        if (pFormatCtx->Stream[i]->codec->codec_type == AVMEDIA_TYPE) {
+            videoStream = i;
+            break;
         }
-        
     }
+    if (videoStream == -1)
+    {
+        return -1; // Didn't find a video steam
+    }
+
     
 }
 
